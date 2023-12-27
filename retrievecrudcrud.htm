@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <form onsubmit="toLocalStorage(event)">
+      <label
+        >Name:
+        <input
+          type="text"
+          name="username"
+          id="usernameInputTag"
+          required=""
+          autocomplete="off"
+        />
+      </label>
+      <label
+        >Email:
+        <input
+          type="email"
+          name="emailid"
+          id="emailidInputTag"
+          required=""
+          autocomplete="off"
+        />
+      </label>
+      <label
+        >Phone no:
+        <input
+          type="tel"
+          name="phoneno"
+          id="phonenoInputTag"
+          autocomplete="off"
+        />
+      </label>
+      <button>Submit</button>
+    </form>
+    <ul id="listOfItems"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script>
+      function toLocalStorage(event) {
+        event.preventDefault();
+
+        var name = event.target.username.value;
+        var email = event.target.emailid.value;
+        var phoneno = event.target.phoneno.value;
+
+        const obj = {
+          name: name,
+          email: email,
+          phoneno: phoneno,
+        };
+
+        axios
+          .post(
+            "https://crudcrud.com/api/a26778bd78dc477c9d3bc1f273949913/appointmentData",
+            obj
+          )
+          .then((response) => {
+            showOnScreen(response.data);
+            console.log(response);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Something went wrong:( </h4>";
+            console.log(err);
+          });
+      }
+      window.addEventListener("DOMContentLoaded", () => {
+        axios
+          .get(
+            "https://crudcrud.com/api/a26778bd78dc477c9d3bc1f273949913/appointmentData"
+          )
+          .then((response) => {
+            console.log(response);
+            for (var i = 0; i < response.data.length; i++) {
+              showOnScreen(response.data[i]);
+            }
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Something went wrong:( </h4>";
+            console.log(err);
+          });
+      });
+
+      function showOnScreen(obj) {
+        let elm = document.getElementById("listOfItems");
+        let li = document.createElement("li");
+
+        li.textContent = obj.name + " - " + obj.email + " - " + obj.phoneno;
+
+        let del = document.createElement("button");
+        del.id = "listOfItems";
+        del.appendChild(document.createTextNode("Delete"));
+
+        let edit = document.createElement("button");
+        edit.id = "listOfItems";
+        edit.appendChild(document.createTextNode("Edit"));
+
+        del.onclick = () => {
+          localStorage.removeItem(obj.name);
+          elm.removeChild(li);
+        };
+
+        edit.onclick = () => {
+          localStorage.removeItem(obj.name);
+          elm.removeChild(li);
+          document.getElementById("usernameInputTag").value = obj.name;
+          document.getElementById("emailidInputTag").value = obj.email;
+          document.getElementById("phonenoInputTag").value = obj.phoneno;
+        };
+
+        li.appendChild(del);
+        li.appendChild(edit);
+        elm.appendChild(li);
+      }
+    </script>
+  </body>
+</html>
