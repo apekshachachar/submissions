@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Waiter's Tab</title>
+  </head>
+  <body>
+    <form onsubmit="toLocalStorage(event)">
+      <label>
+        Choose Price: <input type="number" name="price" id="prInput" required />
+      </label>
+      <label>
+        Choose Dish: <input type="text" name="dish" id="dishInput" required />
+      </label>
+      <label for="table">
+        Choose a Table:
+        <select name="table" id="tableInput">
+          <option value="table1">Table 1</option>
+          <option value="table2">Table 2</option>
+          <option value="table3">Table 3</option>
+          <option value="table4">Table 4</option>
+          <option value="table5">Table 5</option>
+        </select>
+      </label>
+      <button>Add to Bill</button>
+      <h1>ORDERS</h1>
+
+      <ul id="listOfItems"></ul>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <script>
+      function toLocalStorage(event) {
+        event.preventDefault();
+
+        var price = event.target.price.value;
+        var dish = event.target.dish.value;
+        var table = event.target.table.value;
+
+        const customer = {
+          price: price,
+          dish: dish,
+          table: table,
+        };
+        axios
+          .post(
+            "https://crudcrud.com/api/5b6b4f4d16db4bc29db1103af37220c4/Billing",
+            customer
+          )
+          .then((response) => {
+            displayItems(response.data);
+            //console.log(response);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Something went wrong:( </h4>";
+            console.log(err);
+          });
+      }
+      window.addEventListener("DOMContentLoaded", () => {
+        axios
+          .get(
+            "https://crudcrud.com/api/5b6b4f4d16db4bc29db1103af37220c4/Billing"
+          )
+          .then((response) => {
+            console.log(response);
+            for (var i = 0; i < response.data.length; i++) {
+              displayItems(response.data[i]);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+      function displayItems(customer) {
+        let li = document.createElement("li");
+
+        li.textContent =
+          customer.price + " - " + customer.table + " - " + customer.dish;
+
+        const parentNode = document.getElementById("listOfItems");
+        const childHTML = `<li id=${customer._id}> ${customer.price}-${customer.table}-${customer.dish}
+            <button onclick=deleteOrder('${customer._id}') > Delete Order </button>
+                    </li>`;
+        parentNode.innerHTML = parentNode.innerHTML + childHTML;
+      }
+
+      function deleteOrder(tab) {
+        axios
+          .delete(
+            `https://crudcrud.com/api/5b6b4f4d16db4bc29db1103af37220c4/Billing/${tab}`
+          )
+          .then((response) => {
+            removeUserFromScreen(tab);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+
+      function removeUserFromScreen(tab) {
+        const parentNode = document.getElementById("listOfItems");
+        const childNodeToBeDeleted = document.getElementById(tab);
+        if (childNodeToBeDeleted) {
+          parentNode.removeChild(childNodeToBeDeleted);
+        }
+      }
+    </script>
+  </body>
+</html>
